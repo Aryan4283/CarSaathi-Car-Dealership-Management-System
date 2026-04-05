@@ -1,4 +1,4 @@
-🚗 CarSaathi – Car Dealership Management System
+#🚗 CarSaathi – Car Dealership Management System
 
 CarSaathi is a desktop-based Car Dealership Management System built using Java (Swing), MySQL, and JDBC.
 It simulates real-world dealership operations including inventory management, bookings, purchases, and analytics.
