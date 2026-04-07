@@ -99,6 +99,7 @@ public class BookingDao {
 
     return false;
 }
+
 public List<String> getBookingsByCustomer(int customerId){
 
     List<String> list = new ArrayList<>();
