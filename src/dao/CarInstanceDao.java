@@ -77,7 +77,7 @@ public class CarInstanceDao {
 
     List<CarInstance> cars = new ArrayList<>();
 
-    String sql = "SELECT * FROM CARINSTANCE WHERE DealerID = ?";
+    String sql = "SELECT * FROM CARINSTANCE WHERE DealerID = ? AND Status = 'Available";
 
     try (Connection conn = DatabaseConnection.getConnection();
          PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -143,5 +143,26 @@ public int countAvailableCars(int modelId, int dealerId) {
     }
 
     return false;
+}
+    public int getAvailableCarId(int modelId, int dealerId) {
+    String sql = "SELECT CarID FROM CARINSTANCE WHERE ModelID = ? AND DealerID = ? AND Status = 'Available' LIMIT 1";
+
+    try (Connection conn = DatabaseConnection.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+        stmt.setInt(1, modelId);
+        stmt.setInt(2, dealerId);
+
+        ResultSet rs = stmt.executeQuery();
+
+        if (rs.next()) {
+            return rs.getInt("CarID");
+        }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return -1;
 }
 }

@@ -9,13 +9,14 @@ import model.Purchase;
 import java.sql.Connection;
 import java.time.LocalDate;
 import java.util.List;
+import exception.InvalidPurchaseException;
 
-public class PurchaseService {
+public class PurchaseService implements IPurchaseService {
 
     private PurchaseDao purchaseDao = new PurchaseDao();
     private CarInstanceDao carInstanceDao = new CarInstanceDao();
 
-    public boolean processPurchase(int customerId, int carId, double finalPrice) {
+    public boolean processPurchase(int customerId, int carId, double finalPrice) throws InvalidPurchaseException {
 
         Connection conn = null;
 
@@ -26,13 +27,11 @@ public class PurchaseService {
             CarInstance car = carInstanceDao.findById(carId);
 
             if (car == null) {
-                System.out.println("Car not found.");
-                return false;
+                throw new InvalidPurchaseException("Car not found");
             }
 
             if (!car.getStatus().equalsIgnoreCase("Available")) {
-                System.out.println("Car already sold.");
-                return false;
+                throw new InvalidPurchaseException("Car already sold");
             }
 
             Purchase purchase = new Purchase(
@@ -40,8 +39,7 @@ public class PurchaseService {
                     customerId,
                     carId,
                     LocalDate.now(),
-                    finalPrice
-            );
+                    finalPrice);
 
             boolean purchaseInserted = purchaseDao.insertPurchase(purchase, conn);
 
@@ -63,14 +61,17 @@ public class PurchaseService {
 
         } catch (Exception e) {
             try {
-                if (conn != null) conn.rollback();
-            } catch (Exception ignored) {}
+                if (conn != null)
+                    conn.rollback();
+            } catch (Exception ignored) {
+            }
             e.printStackTrace();
         }
 
         return false;
     }
+
     public List<String> getDealerSalesHistory(int dealerId) {
-    return purchaseDao.getSalesHistoryByDealer(dealerId);
-}
+        return purchaseDao.getSalesHistoryByDealer(dealerId);
+    }
 }

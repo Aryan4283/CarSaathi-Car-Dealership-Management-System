@@ -6,12 +6,12 @@ import java.util.*;
 
 public class BookingDao {
 
-    public boolean addBooking(int customerId, int modelId, int dealerId, String status){
+    public boolean addBooking(int customerId, int modelId, int dealerId, String status) {
 
         String sql = "INSERT INTO BOOKING (CustomerID, ModelID, DealerID, Status) VALUES (?, ?, ?, ?)";
 
-        try(Connection conn = DatabaseConnection.getConnection();
-            PreparedStatement stmt = conn.prepareStatement(sql)){
+        try (Connection conn = DatabaseConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, customerId);
             stmt.setInt(2, modelId);
@@ -20,112 +20,134 @@ public class BookingDao {
 
             return stmt.executeUpdate() > 0;
 
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
         return false;
     }
 
-    public List<Object[]> getBookings(int dealerId){
+    public List<Object[]> getBookings(int dealerId) {
 
         List<Object[]> list = new ArrayList<>();
 
-        String sql =
-    "SELECT b.BookingID, u.Name, b.CustomerID, b.ModelID AS ModelID, cm.ModelName, b.Status, up.PhoneNumber " +
-    "FROM BOOKING b " +
-    "JOIN USER u ON b.CustomerID = u.UserID " +
-    "JOIN CARMODEL cm ON b.ModelID = cm.ModelID " +
-    "LEFT JOIN USER_PHONE up ON u.UserID = up.UserID " +
-    "WHERE b.DealerID = ?";
+        String sql = "SELECT b.BookingID, u.Name, b.CustomerID, b.ModelID AS ModelID, cm.ModelName, b.Status, up.PhoneNumber "
+                +
+                "FROM BOOKING b " +
+                "JOIN USER u ON b.CustomerID = u.UserID " +
+                "JOIN CARMODEL cm ON b.ModelID = cm.ModelID " +
+                "LEFT JOIN USER_PHONE up ON u.UserID = up.UserID " +
+                "WHERE b.DealerID = ?";
 
-        try(Connection conn = DatabaseConnection.getConnection();
-            PreparedStatement stmt = conn.prepareStatement(sql)){
+        try (Connection conn = DatabaseConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, dealerId);
             ResultSet rs = stmt.executeQuery();
 
-            while(rs.next()){
-                list.add(new Object[]{
-                    rs.getInt("BookingID"),
-                    rs.getString("Name"),
-                    rs.getInt("CustomerID"),
-                    rs.getInt("ModelID"),
-                    rs.getString("ModelName"),
-                    rs.getString("Status"),
-                    rs.getString("PhoneNumber")
+            while (rs.next()) {
+                list.add(new Object[] {
+                        rs.getInt("BookingID"),
+                        rs.getString("Name"),
+                        rs.getInt("CustomerID"),
+                        rs.getInt("ModelID"),
+                        rs.getString("ModelName"),
+                        rs.getString("Status"),
+                        rs.getString("PhoneNumber")
                 });
             }
 
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
         return list;
     }
 
-    public boolean deleteBooking(int bookingId){
+    public boolean deleteBooking(int bookingId) {
 
         String sql = "DELETE FROM BOOKING WHERE BookingID = ?";
 
-        try(Connection conn = DatabaseConnection.getConnection();
-            PreparedStatement stmt = conn.prepareStatement(sql)){
+        try (Connection conn = DatabaseConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, bookingId);
             return stmt.executeUpdate() > 0;
 
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
         return false;
     }
+
     public boolean updateBookingStatus(int modelId, int dealerId) {
 
-    String sql = "UPDATE BOOKING SET Status = 'Available' " +
-                 "WHERE ModelID = ? AND DealerID = ?";
-    
-    try (Connection conn = DatabaseConnection.getConnection();
-         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        String sql = "UPDATE BOOKING SET Status = 'Available' " +
+                "WHERE ModelID = ? AND DealerID = ?";
 
-        stmt.setInt(1, modelId);
-        stmt.setInt(2, dealerId);
+        try (Connection conn = DatabaseConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-        return stmt.executeUpdate() > 0;
+            stmt.setInt(1, modelId);
+            stmt.setInt(2, dealerId);
 
-    } catch (SQLException e) {
-        e.printStackTrace();
-    }
+            return stmt.executeUpdate() > 0;
 
-    return false;
-}
-
-public List<String> getBookingsByCustomer(int customerId){
-
-    List<String> list = new ArrayList<>();
-
-    String sql =
-        "SELECT BookingID, ModelID, Status " +
-        "FROM BOOKING WHERE CustomerID = ?";
-
-    try(Connection conn = DatabaseConnection.getConnection();
-        PreparedStatement stmt = conn.prepareStatement(sql)){
-
-        stmt.setInt(1, customerId);
-        ResultSet rs = stmt.executeQuery();
-
-        while(rs.next()){
-            list.add(
-                "BookingID: " + rs.getInt("BookingID") +
-                " | Model: " + rs.getInt("ModelID") +
-                " | Status: " + rs.getString("Status")
-            );
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
 
-    }catch(Exception e){
-        e.printStackTrace();
+        return false;
     }
 
-    return list;
-}
+    public List<String> getBookingsByCustomer(int customerId) {
+
+        List<String> list = new ArrayList<>();
+
+        String sql = "SELECT BookingID, ModelID, Status " +
+                "FROM BOOKING WHERE CustomerID = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, customerId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                list.add(
+                        "BookingID: " + rs.getInt("BookingID") +
+                                " | Model: " + rs.getInt("ModelID") +
+                                " | Status: " + rs.getString("Status"));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    public boolean checkCarAvailability(int modelId, int dealerId) {
+
+        String sql = "SELECT COUNT(*) FROM CARINSTANCE WHERE ModelID = ? AND DealerID = ? AND Status = 'Available'";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, modelId);
+            stmt.setInt(2, dealerId);
+
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
 }

@@ -8,6 +8,7 @@ import ui.customer.CustomerProfileUI;
 import service.BookingService;
 import service.CarService;
 import dao.UserPhoneDao;
+import exception.InvalidPurchaseException;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -20,47 +21,47 @@ import java.util.List;
 public class DealerDashboard extends JFrame {
 
     // ── Palette ───────────────────────────────────────────────────────────────
-    private static final Color BG_DARK        = new Color(8,   10,  18);
-    private static final Color PANEL_BG       = new Color(13,  16,  28);
-    private static final Color CARD_BG        = new Color(18,  22,  38);
-    private static final Color CARD_BORDER    = new Color(35,  42,  68);
-    private static final Color ACCENT         = new Color(0,   180, 220);
-    private static final Color ACCENT_GLOW    = new Color(0,   180, 220, 35);
-    private static final Color SUCCESS        = new Color(0,   200, 130);
-    private static final Color DANGER         = new Color(220, 60,  80);
-    private static final Color TEXT_PRIMARY   = new Color(225, 228, 245);
+    private static final Color BG_DARK = new Color(8, 10, 18);
+    private static final Color PANEL_BG = new Color(13, 16, 28);
+    private static final Color CARD_BG = new Color(18, 22, 38);
+    private static final Color CARD_BORDER = new Color(35, 42, 68);
+    private static final Color ACCENT = new Color(0, 180, 220);
+    private static final Color ACCENT_GLOW = new Color(0, 180, 220, 35);
+    private static final Color SUCCESS = new Color(0, 200, 130);
+    private static final Color DANGER = new Color(220, 60, 80);
+    private static final Color TEXT_PRIMARY = new Color(225, 228, 245);
     private static final Color TEXT_SECONDARY = new Color(110, 118, 150);
-    private static final Color INPUT_BG       = new Color(22,  27,  46);
-    private static final Color INPUT_BORDER   = new Color(45,  52,  80);
-    private static final Color TABLE_HEADER   = new Color(22,  27,  46);
-    private static final Color TABLE_ROW      = new Color(18,  22,  38);
-    private static final Color TABLE_ROW_ALT  = new Color(21,  26,  44);
-    private static final Color TABLE_SEL      = new Color(0,   180, 220, 60);
-    private static final Color DIVIDER        = new Color(30,  36,  58);
+    private static final Color INPUT_BG = new Color(22, 27, 46);
+    private static final Color INPUT_BORDER = new Color(45, 52, 80);
+    private static final Color TABLE_HEADER = new Color(22, 27, 46);
+    private static final Color TABLE_ROW = new Color(18, 22, 38);
+    private static final Color TABLE_ROW_ALT = new Color(21, 26, 44);
+    private static final Color TABLE_SEL = new Color(0, 180, 220, 60);
+    private static final Color DIVIDER = new Color(30, 36, 58);
 
     // ── State ─────────────────────────────────────────────────────────────────
-    private int    dealerId;
+    private int dealerId;
     private String dealerName;
 
     // ── Services ──────────────────────────────────────────────────────────────
     private InventoryService inventoryService = new InventoryService();
-    private PurchaseService  purchaseService  = new PurchaseService();
-    private BookingService   bookingService   = new BookingService();
-    private UserPhoneDao     phoneDao         = new UserPhoneDao();
+    private PurchaseService purchaseService = new PurchaseService();
+    private BookingService bookingService = new BookingService();
+    private UserPhoneDao phoneDao = new UserPhoneDao();
 
     // ── Booking table ──────────────────────────────────────────────────────────
     private DefaultTableModel tableModel;
-    private JTable            bookingTable;
+    private JTable bookingTable;
     private JComboBox<String> filterBox;
 
     // ── Inventory table ────────────────────────────────────────────────────────
     private DefaultTableModel inventoryModel;
-    private JTable            inventoryTable;
+    private JTable inventoryTable;
     private JComboBox<String> inventoryFilter;
 
     // ── Models table ───────────────────────────────────────────────────────────
     private DefaultTableModel modelsTableModel;
-    private JTable            modelsTable;
+    private JTable modelsTable;
 
     // ── Right column fields ────────────────────────────────────────────────────
     private JTextField finalPriceField;
@@ -69,7 +70,7 @@ public class DealerDashboard extends JFrame {
 
     // ─────────────────────────────────────────────────────────────────────────
     public DealerDashboard(int dealerId, String dealerName) {
-        this.dealerId   = dealerId;
+        this.dealerId = dealerId;
         this.dealerName = dealerName;
 
         setTitle("Dealer Dashboard — " + dealerName);
@@ -80,8 +81,8 @@ public class DealerDashboard extends JFrame {
         getContentPane().setBackground(BG_DARK);
         getContentPane().setLayout(new BorderLayout());
 
-        getContentPane().add(buildHeader(),    BorderLayout.NORTH);
-        getContentPane().add(buildCenter(),    BorderLayout.CENTER);
+        getContentPane().add(buildHeader(), BorderLayout.NORTH);
+        getContentPane().add(buildCenter(), BorderLayout.CENTER);
         getContentPane().add(buildBottomBar(), BorderLayout.SOUTH);
 
         loadBookings();
@@ -104,11 +105,12 @@ public class DealerDashboard extends JFrame {
     }
 
     // ────────────────────────────────────────────────────────────────────────
-    //  Header
+    // Header
     // ────────────────────────────────────────────────────────────────────────
     private JPanel buildHeader() {
         JPanel h = new JPanel(new BorderLayout()) {
-            @Override protected void paintComponent(Graphics g) {
+            @Override
+            protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setColor(PANEL_BG);
@@ -130,7 +132,8 @@ public class DealerDashboard extends JFrame {
         title.setForeground(TEXT_PRIMARY);
 
         JLabel chip = new JLabel("  " + dealerName + "  ") {
-            @Override protected void paintComponent(Graphics g) {
+            @Override
+            protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(ACCENT_GLOW);
@@ -149,18 +152,18 @@ public class DealerDashboard extends JFrame {
 
         h.add(brand, BorderLayout.WEST);
         h.add(title, BorderLayout.CENTER);
-        h.add(chip,  BorderLayout.EAST);
+        h.add(chip, BorderLayout.EAST);
         return h;
     }
 
     // ────────────────────────────────────────────────────────────────────────
-    //  Center
+    // Center
     // ────────────────────────────────────────────────────────────────────────
     private JPanel buildCenter() {
         JPanel center = new JPanel(new BorderLayout(14, 0));
         center.setOpaque(false);
         center.setBorder(new EmptyBorder(18, 22, 10, 22));
-        center.add(buildMainArea(),    BorderLayout.CENTER);
+        center.add(buildMainArea(), BorderLayout.CENTER);
         center.add(buildRightColumn(), BorderLayout.EAST);
         return center;
     }
@@ -183,7 +186,7 @@ public class DealerDashboard extends JFrame {
         head.setOpaque(false);
         head.add(sectionLabel("Bookings"), BorderLayout.WEST);
 
-        filterBox = new JComboBox<>(new String[]{"All", "Available", "Unavailable"});
+        filterBox = new JComboBox<>(new String[] { "All", "Available", "Unavailable" });
         styleComboBox(filterBox);
         filterBox.addActionListener(e -> applyFilter());
 
@@ -197,9 +200,12 @@ public class DealerDashboard extends JFrame {
         head.add(filterWrap, BorderLayout.EAST);
         card.add(head, BorderLayout.NORTH);
 
-        String[] cols = {"Booking ID", "Name", "Cust ID","Model ID", "Model Name", "Status", "Phone"};
+        String[] cols = { "Booking ID", "Name", "Cust ID", "Model ID", "Model Name", "Status", "Phone" };
         tableModel = new DefaultTableModel(cols, 0) {
-            @Override public boolean isCellEditable(int r, int c) { return false; }
+            @Override
+            public boolean isCellEditable(int r, int c) {
+                return false;
+            }
         };
         bookingTable = new JTable(tableModel);
         styleTable(bookingTable, 5);
@@ -221,12 +227,12 @@ public class DealerDashboard extends JFrame {
         JPanel rightHead = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         rightHead.setOpaque(false);
 
-        JButton carsBtn   = ghostButton("Cars");
+        JButton carsBtn = ghostButton("Cars");
         JButton modelsBtn = ghostButton("Car Models");
         carsBtn.setPreferredSize(new Dimension(90, 28));
         modelsBtn.setPreferredSize(new Dimension(110, 28));
 
-        inventoryFilter = new JComboBox<>(new String[]{"All", "Available", "Unavailable"});
+        inventoryFilter = new JComboBox<>(new String[] { "All", "Available", "Unavailable" });
         styleComboBox(inventoryFilter);
         inventoryFilter.setVisible(false);
 
@@ -248,17 +254,23 @@ public class DealerDashboard extends JFrame {
 
         // Cars view
         inventoryModel = new DefaultTableModel(
-        new String[]{"Car ID", "VIN", "Model ID", "Model Name"}, 0) {
-    @Override public boolean isCellEditable(int r, int c) { return false; }
-};
+                new String[] { "Car ID", "VIN", "Model ID", "Model Name" }, 0) {
+            @Override
+            public boolean isCellEditable(int r, int c) {
+                return false;
+            }
+        };
         inventoryTable = new JTable(inventoryModel);
         styleTable(inventoryTable, -1);
         switcher.add(darkScroll(inventoryTable), "CARS");
 
         // Models view
         modelsTableModel = new DefaultTableModel(
-                new String[]{"Model ID", "Model Name", "Total", "Available", "Status"}, 0) {
-            @Override public boolean isCellEditable(int r, int c) { return false; }
+                new String[] { "Model ID", "Model Name", "Total", "Available", "Status" }, 0) {
+            @Override
+            public boolean isCellEditable(int r, int c) {
+                return false;
+            }
         };
         modelsTable = new JTable(modelsTableModel);
         styleTable(modelsTable, 4);
@@ -280,8 +292,7 @@ public class DealerDashboard extends JFrame {
             loadModels((String) inventoryFilter.getSelectedItem());
         });
 
-        inventoryFilter.addActionListener(e ->
-                loadModels((String) inventoryFilter.getSelectedItem()));
+        inventoryFilter.addActionListener(e -> loadModels((String) inventoryFilter.getSelectedItem()));
 
         return card;
     }
@@ -312,24 +323,31 @@ public class DealerDashboard extends JFrame {
         card.setBorder(new EmptyBorder(14, 16, 14, 16));
 
         GridBagConstraints g = new GridBagConstraints();
-        g.gridx = 0; g.fill = GridBagConstraints.HORIZONTAL; g.weightx = 1.0;
+        g.gridx = 0;
+        g.fill = GridBagConstraints.HORIZONTAL;
+        g.weightx = 1.0;
 
-        g.gridy = 0; g.insets = new Insets(0, 0, 10, 0);
+        g.gridy = 0;
+        g.insets = new Insets(0, 0, 10, 0);
         card.add(sectionLabel("Process Sale"), g);
 
-        g.gridy = 1; g.insets = new Insets(0, 0, 3, 0);
+        g.gridy = 1;
+        g.insets = new Insets(0, 0, 3, 0);
         card.add(fieldLabel("Final Price"), g);
-        g.gridy = 2; g.insets = new Insets(0, 0, 8, 0);
+        g.gridy = 2;
+        g.insets = new Insets(0, 0, 8, 0);
         finalPriceField = miniField();
         card.add(finalPriceField, g);
 
-        g.gridy = 3; g.insets = new Insets(0, 0, 10, 0);
+        g.gridy = 3;
+        g.insets = new Insets(0, 0, 10, 0);
         JLabel hint = new JLabel("Select a row in the table first");
         hint.setFont(new Font("Segoe UI", Font.ITALIC, 11));
         hint.setForeground(TEXT_SECONDARY);
         card.add(hint, g);
 
-        g.gridy = 4; g.insets = new Insets(0, 0, 0, 0);
+        g.gridy = 4;
+        g.insets = new Insets(0, 0, 0, 0);
         JButton btn = styledButton("Process Sale", SUCCESS);
         btn.addActionListener(e -> processFromTable());
         card.add(btn, g);
@@ -343,24 +361,32 @@ public class DealerDashboard extends JFrame {
         card.setBorder(new EmptyBorder(14, 16, 14, 16));
 
         GridBagConstraints g = new GridBagConstraints();
-        g.gridx = 0; g.fill = GridBagConstraints.HORIZONTAL; g.weightx = 1.0;
+        g.gridx = 0;
+        g.fill = GridBagConstraints.HORIZONTAL;
+        g.weightx = 1.0;
 
-        g.gridy = 0; g.insets = new Insets(0, 0, 10, 0);
+        g.gridy = 0;
+        g.insets = new Insets(0, 0, 10, 0);
         card.add(sectionLabel("Add Car to Inventory"), g);
 
-        g.gridy = 1; g.insets = new Insets(0, 0, 3, 0);
+        g.gridy = 1;
+        g.insets = new Insets(0, 0, 3, 0);
         card.add(fieldLabel("VIN"), g);
-        g.gridy = 2; g.insets = new Insets(0, 0, 8, 0);
+        g.gridy = 2;
+        g.insets = new Insets(0, 0, 8, 0);
         vinField = miniField();
         card.add(vinField, g);
 
-        g.gridy = 3; g.insets = new Insets(0, 0, 3, 0);
+        g.gridy = 3;
+        g.insets = new Insets(0, 0, 3, 0);
         card.add(fieldLabel("Model ID"), g);
-        g.gridy = 4; g.insets = new Insets(0, 0, 12, 0);
+        g.gridy = 4;
+        g.insets = new Insets(0, 0, 12, 0);
         modelIdField = miniField();
         card.add(modelIdField, g);
 
-        g.gridy = 5; g.insets = new Insets(0, 0, 0, 0);
+        g.gridy = 5;
+        g.insets = new Insets(0, 0, 0, 0);
         JButton btn = styledButton("Add Car", ACCENT);
         btn.addActionListener(e -> addCar());
         card.add(btn, g);
@@ -371,7 +397,8 @@ public class DealerDashboard extends JFrame {
     // ── Bottom bar ────────────────────────────────────────────────────────────
     private JPanel buildBottomBar() {
         JPanel bar = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10)) {
-            @Override protected void paintComponent(Graphics g) {
+            @Override
+            protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setColor(PANEL_BG);
@@ -383,8 +410,8 @@ public class DealerDashboard extends JFrame {
         };
         bar.setOpaque(false);
 
-        JButton bookBtn     = ghostButton("Book Car");
-        JButton historyBtn  = ghostButton("View Sales");
+        JButton bookBtn = ghostButton("Book Car");
+        JButton historyBtn = ghostButton("View Sales");
         JButton registerBtn = ghostButton("Register Customer");
         JButton profileBtn = ghostButton("View Customer");
         profileBtn.addActionListener(e -> new CustomerProfileUI().setVisible(true));
@@ -393,8 +420,8 @@ public class DealerDashboard extends JFrame {
         historyBtn.addActionListener(e -> new ViewSalesUI(dealerId).setVisible(true));
         registerBtn.addActionListener(e -> new ui.customer.CustomerDashboard().setVisible(true));
         JButton analyticsBtn = ghostButton("Analytics");
-analyticsBtn.addActionListener(e -> new DealerAnalyticsUI(dealerId).setVisible(true));
-bar.add(analyticsBtn);
+        analyticsBtn.addActionListener(e -> new DealerAnalyticsUI(dealerId).setVisible(true));
+        bar.add(analyticsBtn);
 
         bar.add(bookBtn);
         bar.add(historyBtn);
@@ -403,25 +430,27 @@ bar.add(analyticsBtn);
     }
 
     // ────────────────────────────────────────────────────────────────────────
-    //  Logic
+    // Logic
     // ────────────────────────────────────────────────────────────────────────
     private void loadInventory() {
-    inventoryModel.setRowCount(0);
-    List<Object[]> cars = inventoryService.getAvailableCarsByDealer(dealerId);
-    for (Object[] car : cars) {
-        inventoryModel.addRow(new Object[]{
-            car[0], car[1], car[2], car[3]
-        });
+        inventoryModel.setRowCount(0);
+        List<Object[]> cars = inventoryService.getAvailableCarsByDealer(dealerId);
+        for (Object[] car : cars) {
+            inventoryModel.addRow(new Object[] {
+                    car[0], car[1], car[2], car[3]
+            });
+        }
     }
-}
 
     private void loadModels(String filter) {
         modelsTableModel.setRowCount(0);
         List<Object[]> data = inventoryService.getModelInventory(dealerId);
         for (Object[] row : data) {
             String status = (String) row[4];
-            if (filter.equals("Available")   && !status.equals("Available"))   continue;
-            if (filter.equals("Unavailable") && !status.equals("Unavailable")) continue;
+            if (filter.equals("Available") && !status.equals("Available"))
+                continue;
+            if (filter.equals("Unavailable") && !status.equals("Unavailable"))
+                continue;
             modelsTableModel.addRow(row);
         }
     }
@@ -480,43 +509,53 @@ bar.add(analyticsBtn);
         int row = bookingTable.getSelectedRow();
         if (row == -1) {
             JOptionPane.showMessageDialog(this,
-                "Please select a booking row first.", "No Selection",
-                JOptionPane.WARNING_MESSAGE);
+                    "Please select a booking row first.", "No Selection",
+                    JOptionPane.WARNING_MESSAGE);
             return;
         }
         String status = (String) tableModel.getValueAt(row, 5);
-    if (!status.equalsIgnoreCase("Available")) {
-        JOptionPane.showMessageDialog(this,
-            "Cannot process sale. Booking is Unavailable.",
-            "Blocked", JOptionPane.WARNING_MESSAGE);
-        return;
-    }
+        if (!status.equalsIgnoreCase("Available")) {
+            JOptionPane.showMessageDialog(this,
+                    "Cannot process sale. Booking is Unavailable.",
+                    "Blocked", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
         try {
-            int bookingId  = (int) tableModel.getValueAt(row, 0);
+            int bookingId = (int) tableModel.getValueAt(row, 0);
             int customerId = (int) tableModel.getValueAt(row, 2);
-            int modelId    = (int) tableModel.getValueAt(row, 3);
-            double price   = Double.parseDouble(finalPriceField.getText());
+            int modelId = (int) tableModel.getValueAt(row, 3);
+            double price = Double.parseDouble(finalPriceField.getText());
 
-            boolean ok = purchaseService.processPurchase(customerId, modelId, price);
+            int carId = inventoryService.getAvailableCarId(modelId, dealerId);
+
+            if (carId == -1) {
+                JOptionPane.showMessageDialog(this, "No available car for this model.");
+                return;
+            }
+
+            boolean ok = purchaseService.processPurchase(customerId, carId, price);
             if (ok) {
                 bookingService.removeBooking(bookingId);
                 loadBookings();
                 loadInventory();
+                loadModels("All");
                 JOptionPane.showMessageDialog(this, "Purchase successful!");
             } else {
                 JOptionPane.showMessageDialog(this, "Purchase failed.", "Error",
-                    JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.ERROR_MESSAGE);
             }
+        } catch (InvalidPurchaseException e) {
+            JOptionPane.showMessageDialog(this, e.getMessage());
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Invalid input.", "Error",
-                JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Something went wrong", "Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
         }
     }
 
     private void addCar() {
         try {
-            String vin    = vinField.getText();
-            int modelId   = Integer.parseInt(modelIdField.getText());
+            String vin = vinField.getText();
+            int modelId = Integer.parseInt(modelIdField.getText());
             boolean success = inventoryService.addCarToInventory(vin, modelId, dealerId);
             if (success) {
                 bookingService.updateBookingStatus(modelId, dealerId);
@@ -532,7 +571,7 @@ bar.add(analyticsBtn);
     }
 
     // ────────────────────────────────────────────────────────────────────────
-    //  Table styling
+    // Table styling
     // ────────────────────────────────────────────────────────────────────────
     private void styleTable(JTable table, int statusCol) {
         table.setBackground(TABLE_ROW);
@@ -553,7 +592,8 @@ bar.add(analyticsBtn);
         header.setReorderingAllowed(false);
 
         DefaultTableCellRenderer rowRenderer = new DefaultTableCellRenderer() {
-            @Override public Component getTableCellRendererComponent(
+            @Override
+            public Component getTableCellRendererComponent(
                     JTable t, Object val, boolean sel, boolean foc, int r, int c) {
                 super.getTableCellRendererComponent(t, val, sel, foc, r, c);
                 setOpaque(true);
@@ -570,39 +610,41 @@ bar.add(analyticsBtn);
         if (statusCol >= 0 && statusCol < table.getColumnCount()) {
             table.getColumnModel().getColumn(statusCol).setCellRenderer(
                     new DefaultTableCellRenderer() {
-                @Override public Component getTableCellRendererComponent(
-                        JTable t, Object val, boolean sel, boolean foc, int r, int c) {
-                    super.getTableCellRendererComponent(t, val, sel, foc, r, c);
-                    setHorizontalAlignment(CENTER);
-                    setOpaque(true);
-                    String s = val == null ? "" : val.toString();
-                    if (s.equals("Available")) {
-                        setForeground(SUCCESS);
-                        setBackground(new Color(0, 200, 130, 25));
-                    } else {
-                        setForeground(DANGER);
-                        setBackground(new Color(220, 60, 80, 25));
-                    }
-                    setBorder(new EmptyBorder(0, 8, 0, 8));
-                    return this;
-                }
-            });
+                        @Override
+                        public Component getTableCellRendererComponent(
+                                JTable t, Object val, boolean sel, boolean foc, int r, int c) {
+                            super.getTableCellRendererComponent(t, val, sel, foc, r, c);
+                            setHorizontalAlignment(CENTER);
+                            setOpaque(true);
+                            String s = val == null ? "" : val.toString();
+                            if (s.equals("Available")) {
+                                setForeground(SUCCESS);
+                                setBackground(new Color(0, 200, 130, 25));
+                            } else {
+                                setForeground(DANGER);
+                                setBackground(new Color(220, 60, 80, 25));
+                            }
+                            setBorder(new EmptyBorder(0, 8, 0, 8));
+                            return this;
+                        }
+                    });
         }
     }
 
     // ────────────────────────────────────────────────────────────────────────
-    //  UI helpers
+    // UI helpers
     // ────────────────────────────────────────────────────────────────────────
     private JPanel card() {
         return new JPanel() {
-            @Override protected void paintComponent(Graphics g) {
+            @Override
+            protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(CARD_BG);
                 g2.fill(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 14, 14));
                 g2.setColor(CARD_BORDER);
                 g2.setStroke(new BasicStroke(1f));
-                g2.draw(new RoundRectangle2D.Float(0.5f, 0.5f, getWidth()-1, getHeight()-1, 14, 14));
+                g2.draw(new RoundRectangle2D.Float(0.5f, 0.5f, getWidth() - 1, getHeight() - 1, 14, 14));
                 g2.dispose();
             }
         };
@@ -626,7 +668,8 @@ bar.add(analyticsBtn);
 
     private JTextField miniField() {
         JTextField f = new JTextField() {
-            @Override protected void paintComponent(Graphics g) {
+            @Override
+            protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(INPUT_BG);
@@ -634,12 +677,14 @@ bar.add(analyticsBtn);
                 g2.dispose();
                 super.paintComponent(g);
             }
-            @Override protected void paintBorder(Graphics g) {
+
+            @Override
+            protected void paintBorder(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(hasFocus() ? ACCENT : INPUT_BORDER);
                 g2.setStroke(new BasicStroke(hasFocus() ? 1.5f : 1f));
-                g2.draw(new RoundRectangle2D.Float(0, 0, getWidth()-1, getHeight()-1, 8, 8));
+                g2.draw(new RoundRectangle2D.Float(0, 0, getWidth() - 1, getHeight() - 1, 8, 8));
                 g2.dispose();
             }
         };
@@ -650,8 +695,15 @@ bar.add(analyticsBtn);
         f.setBorder(new EmptyBorder(7, 10, 7, 10));
         f.setPreferredSize(new Dimension(240, 34));
         f.addFocusListener(new FocusAdapter() {
-            @Override public void focusGained(FocusEvent e) { f.repaint(); }
-            @Override public void focusLost(FocusEvent e)   { f.repaint(); }
+            @Override
+            public void focusGained(FocusEvent e) {
+                f.repaint();
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                f.repaint();
+            }
         });
         return f;
     }
@@ -661,18 +713,39 @@ bar.add(analyticsBtn);
             boolean hovered = false, pressed = false;
             {
                 addMouseListener(new MouseAdapter() {
-                    @Override public void mouseEntered(MouseEvent e)  { hovered = true;  repaint(); }
-                    @Override public void mouseExited(MouseEvent e)   { hovered = false; repaint(); }
-                    @Override public void mousePressed(MouseEvent e)  { pressed = true;  repaint(); }
-                    @Override public void mouseReleased(MouseEvent e) { pressed = false; repaint(); }
+                    @Override
+                    public void mouseEntered(MouseEvent e) {
+                        hovered = true;
+                        repaint();
+                    }
+
+                    @Override
+                    public void mouseExited(MouseEvent e) {
+                        hovered = false;
+                        repaint();
+                    }
+
+                    @Override
+                    public void mousePressed(MouseEvent e) {
+                        pressed = true;
+                        repaint();
+                    }
+
+                    @Override
+                    public void mouseReleased(MouseEvent e) {
+                        pressed = false;
+                        repaint();
+                    }
                 });
             }
-            @Override protected void paintComponent(Graphics g) {
+
+            @Override
+            protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 if (hovered) {
                     g2.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), 50));
-                    g2.fill(new RoundRectangle2D.Float(-3, -3, getWidth()+6, getHeight()+6, 14, 14));
+                    g2.fill(new RoundRectangle2D.Float(-3, -3, getWidth() + 6, getHeight() + 6, 14, 14));
                 }
                 g2.setColor(pressed ? color.darker() : hovered ? color.brighter() : color);
                 g2.fill(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 8, 8));
@@ -680,11 +753,14 @@ bar.add(analyticsBtn);
                 g2.setColor(Color.WHITE);
                 FontMetrics fm = g2.getFontMetrics();
                 g2.drawString(getText(),
-                    (getWidth()  - fm.stringWidth(getText())) / 2,
-                    (getHeight() + fm.getAscent() - fm.getDescent()) / 2);
+                        (getWidth() - fm.stringWidth(getText())) / 2,
+                        (getHeight() + fm.getAscent() - fm.getDescent()) / 2);
                 g2.dispose();
             }
-            @Override protected void paintBorder(Graphics g) {}
+
+            @Override
+            protected void paintBorder(Graphics g) {
+            }
         };
         btn.setOpaque(false);
         btn.setContentAreaFilled(false);
@@ -700,27 +776,41 @@ bar.add(analyticsBtn);
             boolean hovered = false;
             {
                 addMouseListener(new MouseAdapter() {
-                    @Override public void mouseEntered(MouseEvent e) { hovered = true;  repaint(); }
-                    @Override public void mouseExited(MouseEvent e)  { hovered = false; repaint(); }
+                    @Override
+                    public void mouseEntered(MouseEvent e) {
+                        hovered = true;
+                        repaint();
+                    }
+
+                    @Override
+                    public void mouseExited(MouseEvent e) {
+                        hovered = false;
+                        repaint();
+                    }
                 });
             }
-            @Override protected void paintComponent(Graphics g) {
+
+            @Override
+            protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(hovered ? CARD_BG : new Color(0, 0, 0, 0));
                 g2.fill(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 8, 8));
                 g2.setColor(hovered ? CARD_BORDER : INPUT_BORDER);
                 g2.setStroke(new BasicStroke(1f));
-                g2.draw(new RoundRectangle2D.Float(0, 0, getWidth()-1, getHeight()-1, 8, 8));
+                g2.draw(new RoundRectangle2D.Float(0, 0, getWidth() - 1, getHeight() - 1, 8, 8));
                 g2.setFont(new Font("Segoe UI", Font.PLAIN, 13));
                 g2.setColor(hovered ? TEXT_PRIMARY : TEXT_SECONDARY);
                 FontMetrics fm = g2.getFontMetrics();
                 g2.drawString(getText(),
-                    (getWidth()  - fm.stringWidth(getText())) / 2,
-                    (getHeight() + fm.getAscent() - fm.getDescent()) / 2);
+                        (getWidth() - fm.stringWidth(getText())) / 2,
+                        (getHeight() + fm.getAscent() - fm.getDescent()) / 2);
                 g2.dispose();
             }
-            @Override protected void paintBorder(Graphics g) {}
+
+            @Override
+            protected void paintBorder(Graphics g) {
+            }
         };
         btn.setOpaque(false);
         btn.setContentAreaFilled(false);
@@ -754,12 +844,22 @@ bar.add(analyticsBtn);
         sb.setBackground(INPUT_BG);
         sb.setPreferredSize(new Dimension(6, 6));
         sb.setUI(new javax.swing.plaf.basic.BasicScrollBarUI() {
-            @Override protected void configureScrollBarColors() {
+            @Override
+            protected void configureScrollBarColors() {
                 thumbColor = new Color(50, 60, 90);
                 trackColor = INPUT_BG;
             }
-            @Override protected JButton createDecreaseButton(int o) { return zero(); }
-            @Override protected JButton createIncreaseButton(int o) { return zero(); }
+
+            @Override
+            protected JButton createDecreaseButton(int o) {
+                return zero();
+            }
+
+            @Override
+            protected JButton createIncreaseButton(int o) {
+                return zero();
+            }
+
             private JButton zero() {
                 JButton b = new JButton();
                 b.setPreferredSize(new Dimension(0, 0));

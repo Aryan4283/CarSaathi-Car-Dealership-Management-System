@@ -8,7 +8,7 @@ import model.CarModel;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InventoryService {
+public class InventoryService implements IInventoryService {
 
     private CarInstanceDao carInstanceDao;
     private CarModelDao    carModelDao;
@@ -46,5 +46,8 @@ public class InventoryService {
         });
     }
     return list;
+}
+    public int getAvailableCarId(int modelId, int dealerId) {
+    return carInstanceDao.getAvailableCarId(modelId, dealerId);
 }
 }
