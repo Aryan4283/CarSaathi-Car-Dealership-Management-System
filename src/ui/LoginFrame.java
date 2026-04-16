@@ -33,7 +33,7 @@ public class LoginFrame extends JFrame {
 
     public LoginFrame() {
 
-        userService = new UserService();  // ← logic untouched
+        userService = new UserService();  
 
         setTitle("Car Dealership Management System");
         setSize(460, 540);
@@ -183,9 +183,7 @@ public class LoginFrame extends JFrame {
         return p;
     }
 
-    // ────────────────────────────────────────────────────────────────────────
-    //  Helpers
-    // ────────────────────────────────────────────────────────────────────────
+
     private JLabel fieldLabel(String text) {
         JLabel l = new JLabel(text);
         l.setFont(new Font("Segoe UI", Font.PLAIN, 12));
@@ -301,9 +299,6 @@ public class LoginFrame extends JFrame {
         return btn;
     }
 
-    // ────────────────────────────────────────────────────────────────────────
-    //  Login logic — completely unchanged
-    // ────────────────────────────────────────────────────────────────────────
     private void handleLogin() {
 
         String email    = emailField.getText();

@@ -95,31 +95,39 @@ public class CustomerDashboard extends JFrame {
         return card;
     }
 
-    // ── Logic (unchanged) ─────────────────────────────────────────────────────
     private void registerCustomer() {
-        String name    = nameField.getText();
-        String email   = emailField.getText();
-        String phone   = phoneField.getText();
+    String name = nameField.getText().trim();
+    String email = emailField.getText().trim();
+    String street = streetField.getText().trim();
+    String city = cityField.getText().trim();
+    String state = stateField.getText().trim();
+    String pincode = pincodeField.getText().trim();
+    String phone = phoneField.getText().trim();
 
-        if (name.isEmpty() || email.isEmpty() || phone.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Name, Email, Phone required");
-            return;
-        }
-
-        boolean success = customerService.registerCustomer(
-            name, email,
-            streetField.getText(), cityField.getText(),
-            stateField.getText(), pincodeField.getText(),
-            phone
-        );
-
-        if (success) {
-            JOptionPane.showMessageDialog(this, "Customer Registered Successfully");
-            clearFields();
-        } else {
-            JOptionPane.showMessageDialog(this, "Customer Registration Failed");
-        }
+    if (name.isEmpty() || email.isEmpty() || phone.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Name, Email and Phone are required.");
+        return;
     }
+    if (!email.contains("@") || !email.contains(".")) {
+        JOptionPane.showMessageDialog(this, "Enter a valid email address.");
+        return;
+    }
+    if (!phone.matches("\\d{10}")) {
+        JOptionPane.showMessageDialog(this, "Phone number must be exactly 10 digits.");
+        return;
+    }
+
+    boolean success = customerService.registerCustomer(
+        name, email, street, city, state, pincode, phone
+    );
+
+    if (success) {
+        JOptionPane.showMessageDialog(this, "Customer Registered Successfully");
+        clearFields();
+    } else {
+        JOptionPane.showMessageDialog(this, "Customer Registration Failed");
+    }
+}
 
     private void clearFields() {
         nameField.setText(""); emailField.setText(""); streetField.setText("");

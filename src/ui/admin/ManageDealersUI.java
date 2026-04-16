@@ -24,12 +24,12 @@ public class ManageDealersUI extends JFrame {
     private JTextField     nameField, emailField, showroomField, locationField;
     private JPasswordField passwordField;
     private DealerService  dealerService;
-
+    private JTextField phoneField;
     public ManageDealersUI() {
         dealerService = new DealerService();
 
         setTitle("Register Dealer");
-        setSize(460, 520);
+        setSize(460, 590);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         getContentPane().setBackground(BG_DARK);
@@ -52,7 +52,7 @@ public class ManageDealersUI extends JFrame {
             }
         };
         card.setOpaque(false);
-        card.setPreferredSize(new Dimension(400, 460));
+        card.setPreferredSize(new Dimension(400, 530));
         card.setBorder(new EmptyBorder(28, 32, 28, 32));
 
         GridBagConstraints g = new GridBagConstraints();
@@ -72,7 +72,7 @@ public class ManageDealersUI extends JFrame {
         card.add(sub, g);
 
         // Fields
-        String[] labels = {"Dealer Name", "Dealer Email", "Password", "Showroom Name", "Location"};
+        String[] labels = {"Dealer Name", "Dealer Email", "Password", "Showroom Name", "Location","Phone Number"};
         g.insets = new Insets(0, 0, 4, 0);
 
         for (int i = 0; i < labels.length; i++) {
@@ -91,13 +91,14 @@ public class ManageDealersUI extends JFrame {
                     case "Dealer Email":    emailField    = f; break;
                     case "Showroom Name":   showroomField = f; break;
                     case "Location":        locationField = f; break;
+                    case "Phone Number": phoneField = f; break;
                 }
                 card.add(f, g);
             }
             g.insets = new Insets(0, 0, 4, 0);
         }
 
-        g.gridy = 12; g.insets = new Insets(0, 0, 0, 0);
+        g.gridy = 14; g.insets = new Insets(0, 0, 0, 0);
         JButton btn = styledButton("Register Dealer");
         btn.addActionListener(e -> registerDealer());
         card.add(btn, g);
@@ -107,14 +108,30 @@ public class ManageDealersUI extends JFrame {
 
     // ── Logic (unchanged) ─────────────────────────────────────────────────────
     private void registerDealer() {
-        boolean success = dealerService.registerDealer(
-            nameField.getText(), emailField.getText(),
-            new String(passwordField.getPassword()),
-            showroomField.getText(), locationField.getText()
-        );
-        JOptionPane.showMessageDialog(this,
-            success ? "Dealer Registered Successfully" : "Registration Failed");
+    String name = nameField.getText().trim();
+    String email = emailField.getText().trim();
+    String password = new String(passwordField.getPassword());
+    String showroom = showroomField.getText().trim();
+    String location = locationField.getText().trim();
+    String phone = phoneField.getText().trim();
+
+    if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "All fields are required.");
+        return;
     }
+    if (!email.contains("@") || !email.contains(".")) {
+        JOptionPane.showMessageDialog(this, "Enter a valid email address.");
+        return;
+    }
+    if (!phone.matches("\\d{10}")) {
+        JOptionPane.showMessageDialog(this, "Phone number must be exactly 10 digits.");
+        return;
+    }
+
+    boolean success = dealerService.registerDealer(name, email, password, showroom, location);
+    JOptionPane.showMessageDialog(this,
+        success ? "Dealer Registered Successfully" : "Registration Failed");
+}
 
     // ── UI helpers ────────────────────────────────────────────────────────────
     private JLabel fieldLabel(String text) {

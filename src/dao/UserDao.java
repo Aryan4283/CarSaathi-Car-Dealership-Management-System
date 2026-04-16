@@ -30,7 +30,7 @@ public class UserDao {
                 ResultSet rs = stmt.getGeneratedKeys();
 
                 if (rs.next()) {
-                    return rs.getInt(1);   // return generated UserID
+                    return rs.getInt(1);   
                 }
             }
 
